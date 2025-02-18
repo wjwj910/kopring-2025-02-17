@@ -5,11 +5,9 @@ import com.ll.domain.post.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@SuperBuilder
 @NoArgsConstructor
 public class PostGenFile extends GenFile {
     public enum TypeCode {
@@ -30,5 +28,12 @@ public class PostGenFile extends GenFile {
     @Override
     protected String getTypeCodeAsStr() {
         return typeCode.name();
+    }
+
+    public PostGenFile(Post post, TypeCode typeCode, int fileNo) {
+        super(fileNo);
+
+        this.post = post;
+        this.typeCode = typeCode;
     }
 }
