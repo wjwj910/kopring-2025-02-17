@@ -1,68 +1,41 @@
 package com.ll.domain.base.genFile.genFile.entity;
 
-import com.ll.global.app.AppConfig;
-import com.ll.global.jpa.entity.BaseTime;
-import com.ll.standard.util.Ut;
-import jakarta.persistence.MappedSuperclass;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.ll.global.app.AppConfig
+import com.ll.global.jpa.entity.BaseTime
+import com.ll.standard.util.Ut
+import jakarta.persistence.MappedSuperclass
 
-import java.util.Objects;
-
-@Getter
-@Setter
-@NoArgsConstructor
 @MappedSuperclass
-public abstract class GenFile extends BaseTime {
-    private int fileNo;
-    private String originalFileName;
-    private String metadata;
-    private String fileDateDir;
-    private String fileExt;
-    private String fileExtTypeCode;
-    private String fileExtType2Code;
-    private String fileName;
-    private int fileSize;
+abstract class GenFile : BaseTime {
+    var fileNo: Int = 0;
+    lateinit var originalFileName: String
+    lateinit var metadata: String
+    lateinit var fileDateDir: String
+    lateinit var fileExt: String
+    lateinit var fileExtTypeCode: String
+    lateinit var fileExtType2Code: String
+    lateinit var fileName: String
+    var fileSize: Int = 0;
 
-    public GenFile(int fileNo) {
+    constructor(fileNo: Int) {
         this.fileNo = fileNo;
     }
 
-    public String getFilePath() {
-        return AppConfig.getGenFileDirPath() + "/" + getModelName() + "/" + getTypeCodeAsStr() + "/" + fileDateDir + "/" + fileName;
-    }
+    val filePath: String
+        get() = AppConfig.getGenFileDirPath() + "/" + getModelName() + "/" + getTypeCodeAsStr() + "/" + fileDateDir + "/" + fileName;
 
-    @Override
-    public boolean equals(Object o) {
-        if (getId() != null) return super.equals(o);
+    val ownerModelName: String
+        get() = modelName.replace("GenFile", "");
 
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        GenFile that = (GenFile) o;
-        return fileNo == that.getFileNo() && Objects.equals(getTypeCodeAsStr(), that.getTypeCodeAsStr());
-    }
+    val downloadUrl: String
+        get() = AppConfig.getSiteBackUrl() + "/" + ownerModelName + "/genFile/download/" + getOwnerModelId() + "/" + fileName;
 
-    @Override
-    public int hashCode() {
-        if (getId() != null) return super.hashCode();
+    val publicUrl: String
+        get() = AppConfig.getSiteBackUrl() + "/gen/" + getModelName() + "/" + getTypeCodeAsStr() + "/" + fileDateDir + "/" + fileName + "?modifyDate=" + Ut.date.patternOf(
+            modifyDate,
+            "yyyy-MM-dd--HH-mm-ss"
+        ) + "&" + metadata;
 
-        return Objects.hash(super.hashCode(), getTypeCodeAsStr(), fileNo);
-    }
-
-    private String getOwnerModelName() {
-        return this.getModelName().replace("GenFile", "");
-    }
-
-    public String getDownloadUrl() {
-        return AppConfig.getSiteBackUrl() + "/" + getOwnerModelName() + "/genFile/download/" + getOwnerModelId() + "/" + fileName;
-    }
-
-    public String getPublicUrl() {
-        return AppConfig.getSiteBackUrl() + "/gen/" + getModelName() + "/" + getTypeCodeAsStr() + "/" + fileDateDir + "/" + fileName + "?modifyDate=" + Ut.date.patternOf(getModifyDate(), "yyyy-MM-dd--HH-mm-ss") + "&" + metadata;
-    }
-
-    abstract protected long getOwnerModelId();
-
-    abstract protected String getTypeCodeAsStr();
+    protected abstract fun getOwnerModelId(): Long
+    protected abstract fun getTypeCodeAsStr(): String
 }
