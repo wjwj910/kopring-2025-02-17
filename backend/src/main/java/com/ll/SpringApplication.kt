@@ -1,14 +1,13 @@
-package com.ll;
+package com.ll
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 
 @SpringBootApplication
 @EnableJpaAuditing
-public class SpringApplication {
+class SpringApplication
 
-    public static void main(String[] args) {
-        org.springframework.boot.SpringApplication.run(SpringApplication.class, args);
-    }
-
+fun main(args: Array<String>) {
+    runApplication<SpringApplication>(*args)
 }
