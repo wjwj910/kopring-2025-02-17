@@ -1,285 +1,284 @@
-package com.ll.domain.post.post.entity;
+package com.ll.domain.post.post.entity
 
-import com.ll.domain.member.member.entity.Member;
-import com.ll.domain.post.comment.entity.PostComment;
-import com.ll.domain.post.genFile.entity.PostGenFile;
-import com.ll.global.exceptions.ServiceException;
-import com.ll.global.jpa.entity.BaseTime;
-import com.ll.global.rsData.RsData;
-import com.ll.standard.base.Empty;
-import com.ll.standard.util.Ut;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.ll.domain.member.member.entity.Member
+import com.ll.domain.post.comment.entity.PostComment
+import com.ll.domain.post.genFile.entity.PostGenFile
+import com.ll.global.exceptions.ServiceException
+import com.ll.global.jpa.entity.BaseTime
+import com.ll.global.rsData.RsData
+import com.ll.standard.base.Empty
+import com.ll.standard.util.Ut
+import jakarta.persistence.*
+import java.util.*
+import java.util.stream.Collectors
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-public class Post extends BaseTime {
+class Post : BaseTime {
     @ManyToOne(fetch = FetchType.LAZY)
-    private Member author;
+    lateinit var author: Member
 
     @Column(length = 100)
-    private String title;
+    lateinit var title: String
 
     @Column(columnDefinition = "TEXT")
-    private String content;
+    lateinit var content: String
 
-    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-    private List<PostComment> comments = new ArrayList<>();
+    @OneToMany(mappedBy = "post", cascade = [CascadeType.PERSIST, CascadeType.REMOVE], orphanRemoval = true)
+    val comments: MutableList<PostComment> = mutableListOf()
 
-    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-    private List<PostGenFile> genFiles = new ArrayList<>();
+    @OneToMany(mappedBy = "post", cascade = [CascadeType.PERSIST, CascadeType.REMOVE], orphanRemoval = true)
+    val genFiles: MutableList<PostGenFile> = mutableListOf()
 
     // OneToOne 은 레이지 로딩이 안된다.
     @ManyToOne(fetch = FetchType.LAZY)
-    private PostGenFile thumbnailGenFile;
+    var thumbnailGenFile: PostGenFile? = null
 
-    private boolean published;
+    var published: Boolean = false
 
-    private boolean listed;
+    var listed: Boolean = false
 
-    public Post(Member author, String title, String content, boolean published, boolean listed) {
-        this.author = author;
-        this.title = title;
-        this.content = content;
-        this.published = published;
-        this.listed = listed;
+    fun isPublished(): Boolean {
+        return published
     }
 
-    public PostComment addComment(Member author, String content) {
-        PostComment comment = new PostComment(
-                this,
-                author,
-                content
-        );
-
-        comments.add(comment);
-
-        return comment;
+    fun isListed(): Boolean {
+        return listed
     }
 
-    public List<PostComment> getCommentsByOrderByIdDesc() {
-        return comments.reversed();
+    constructor(author: Member, title: String, content: String, published: Boolean, listed: Boolean) {
+        this.author = author
+        this.title = title
+        this.content = content
+        this.published = published
+        this.listed = listed
     }
 
-    public Optional<PostComment> getCommentById(long commentId) {
+    fun addComment(author: Member, content: String): PostComment {
+        val comment = PostComment(
+            this,
+            author,
+            content
+        )
+
+        comments.add(comment)
+
+        return comment
+    }
+
+    val commentsByOrderByIdDesc: List<PostComment>
+        get() = comments.reversed()
+
+    fun getCommentById(commentId: Long): Optional<PostComment> {
         return comments.stream()
-                .filter(comment -> comment.getId().equals(commentId))
-                .findFirst();
+            .filter { comment -> comment.id == commentId }
+            .findFirst()
     }
 
-    public void removeComment(PostComment postComment) {
-        comments.remove(postComment);
+    fun removeComment(postComment: PostComment) {
+        comments.remove(postComment)
     }
 
+    fun getCheckActorCanDeleteRs(actor: Member?): RsData<Empty> {
+        if (actor == null) return RsData("401-1", "로그인 후 이용해주세요.")
 
-    public RsData<Empty> getCheckActorCanDeleteRs(Member actor) {
-        if (actor == null) return new RsData<>("401-1", "로그인 후 이용해주세요.");
+        if (actor.isAdmin) return RsData.OK
 
-        if (actor.isAdmin()) return RsData.OK;
+        if (actor == author) return RsData.OK
 
-        if (actor.equals(author)) return RsData.OK;
-
-        return new RsData<>("403-1", "작성자만 글을 삭제할 수 있습니다.");
+        return RsData("403-1", "작성자만 글을 삭제할 수 있습니다.")
     }
 
-    public void checkActorCanDelete(Member actor) {
+    fun checkActorCanDelete(actor: Member?) {
         Optional.of(
-                        getCheckActorCanDeleteRs(actor)
-                )
-                .filter(RsData::isFail)
-                .ifPresent(rsData -> {
-                    throw new ServiceException(rsData.getResultCode(), rsData.getMsg());
-                });
+            getCheckActorCanDeleteRs(actor)
+        )
+            .filter { rsData -> rsData.isFail }
+            .ifPresent { rsData ->
+                throw ServiceException(rsData.resultCode, rsData.msg)
+            }
     }
 
+    fun getCheckActorCanModifyRs(actor: Member?): RsData<Empty> {
+        if (actor == null) return RsData("401-1", "로그인 후 이용해주세요.")
 
-    public RsData<Empty> getCheckActorCanModifyRs(Member actor) {
-        if (actor == null) return new RsData<>("401-1", "로그인 후 이용해주세요.");
+        if (actor == author) return RsData.OK
 
-        if (actor.equals(author)) return RsData.OK;
-
-        return new RsData<>("403-1", "작성자만 글을 수정할 수 있습니다.");
+        return RsData("403-1", "작성자만 글을 수정할 수 있습니다.")
     }
 
-    public void checkActorCanModify(Member actor) {
+    fun checkActorCanModify(actor: Member?) {
         Optional.of(
-                        getCheckActorCanModifyRs(actor)
-                )
-                .filter(RsData::isFail)
-                .ifPresent(rsData -> {
-                    throw new ServiceException(rsData.getResultCode(), rsData.getMsg());
-                });
+            getCheckActorCanModifyRs(actor)
+        )
+            .filter { rsData -> rsData.isFail }
+            .ifPresent { rsData ->
+                throw ServiceException(rsData.resultCode, rsData.msg)
+            }
     }
 
+    fun getCheckActorCanReadRs(actor: Member?): RsData<Empty> {
+        if (actor == null) return RsData("401-1", "로그인 후 이용해주세요.")
 
-    public RsData<Empty> getCheckActorCanReadRs(Member actor) {
-        if (actor == null) return new RsData<>("401-1", "로그인 후 이용해주세요.");
+        if (actor.isAdmin) return RsData.OK
 
-        if (actor.isAdmin()) return RsData.OK;
+        if (actor == author) return RsData.OK
 
-        if (actor.equals(author)) return RsData.OK;
-
-        return new RsData<>("403-1", "비공개글은 작성자만 볼 수 있습니다.");
+        return RsData("403-1", "비공개글은 작성자만 볼 수 있습니다.")
     }
 
-    public void checkActorCanRead(Member actor) {
+    fun checkActorCanRead(actor: Member?) {
         Optional.of(
-                        getCheckActorCanReadRs(actor)
-                )
-                .filter(RsData::isFail)
-                .ifPresent(rsData -> {
-                    throw new ServiceException(rsData.getResultCode(), rsData.getMsg());
-                });
+            getCheckActorCanReadRs(actor)
+        )
+            .filter { rsData -> rsData.isFail }
+            .ifPresent { rsData ->
+                throw ServiceException(rsData.resultCode, rsData.msg)
+            }
     }
 
-    private PostGenFile processGenFile(PostGenFile oldPostGenFile, PostGenFile.TypeCode typeCode, int fileNo, String filePath) {
-        boolean isModify = oldPostGenFile != null;
-        String originalFileName = Ut.file.getOriginalFileName(filePath);
-        String metadataStrFromFileName = Ut.file.getMetadataStrFromFileName(filePath);
-        String fileExt = Ut.file.getFileExt(filePath);
-        String fileExtTypeCode = Ut.file.getFileExtTypeCodeFromFileExt(fileExt);
-        String fileExtType2Code = Ut.file.getFileExtType2CodeFromFileExt(fileExt);
+    private fun processGenFile(
+        oldPostGenFile: PostGenFile?,
+        typeCode: PostGenFile.TypeCode,
+        fileNo: Int,
+        filePath: String
+    ): PostGenFile {
+        val isModify = oldPostGenFile != null
+        val originalFileName = Ut.file.getOriginalFileName(filePath)
+        val metadataStrFromFileName = Ut.file.getMetadataStrFromFileName(filePath)
+        val fileExt = Ut.file.getFileExt(filePath)
+        val fileExtTypeCode = Ut.file.getFileExtTypeCodeFromFileExt(fileExt)
+        val fileExtType2Code = Ut.file.getFileExtType2CodeFromFileExt(fileExt)
 
-        String metadataStr = Ut.file.getMetadata(filePath).entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining("&"));
+        var metadataStr = Ut.file.getMetadata(filePath).entries.stream()
+            .map { entry -> entry.key + "=" + entry.value }
+            .collect(Collectors.joining("&"))
 
         if (Ut.str.isNotBlank(metadataStrFromFileName)) {
-            metadataStr = Ut.str.isNotBlank(metadataStr)
-                    ? metadataStr + "&" + metadataStrFromFileName
-                    : metadataStrFromFileName;
+            metadataStr = if (Ut.str.isNotBlank(metadataStr))
+                "$metadataStr&$metadataStrFromFileName"
+            else
+                metadataStrFromFileName
         }
 
-        String fileName = isModify ? Ut.file.withNewExt(oldPostGenFile.getFileName(), fileExt) : UUID.randomUUID() + "." + fileExt;
-        int fileSize = Ut.file.getFileSize(filePath);
-        fileNo = fileNo == 0 ? getNextGenFileNo(typeCode) : fileNo;
+        val fileName = if (isModify) Ut.file.withNewExt(oldPostGenFile!!.fileName, fileExt) else UUID.randomUUID()
+            .toString() + "." + fileExt
+        val fileSize = Ut.file.getFileSize(filePath)
+        val actualFileNo = if (fileNo == 0) getNextGenFileNo(typeCode) else fileNo
 
-        PostGenFile genFile = isModify ? oldPostGenFile : new PostGenFile(
-                this,
-                typeCode,
-                fileNo
-        );
+        val genFile = if (isModify) oldPostGenFile!! else PostGenFile(
+            this,
+            typeCode,
+            actualFileNo
+        )
 
-        genFile.setOriginalFileName(originalFileName);
-        genFile.setMetadata(metadataStr);
-        genFile.setFileDateDir(Ut.date.getCurrentDateFormatted("yyyy_MM_dd"));
-        genFile.setFileExt(fileExt);
-        genFile.setFileExtTypeCode(fileExtTypeCode);
-        genFile.setFileExtType2Code(fileExtType2Code);
-        genFile.setFileName(fileName);
-        genFile.setFileSize(fileSize);
+        genFile.originalFileName = originalFileName
+        genFile.metadata = metadataStr
+        genFile.fileDateDir = Ut.date.getCurrentDateFormatted("yyyy_MM_dd")
+        genFile.fileExt = fileExt
+        genFile.fileExtTypeCode = fileExtTypeCode
+        genFile.fileExtType2Code = fileExtType2Code
+        genFile.fileName = fileName
+        genFile.fileSize = fileSize
 
-        if (!isModify) genFiles.add(genFile);
+        if (!isModify) genFiles.add(genFile)
 
         if (isModify) {
-            Ut.file.rm(genFile.getFilePath());
+            Ut.file.rm(genFile.filePath)
         }
 
-        Ut.file.mv(filePath, genFile.getFilePath());
+        Ut.file.mv(filePath, genFile.filePath)
 
-        return genFile;
+        return genFile
     }
 
-    public PostGenFile addGenFile(PostGenFile.TypeCode typeCode, String filePath) {
-        return addGenFile(typeCode, 0, filePath);
+    fun addGenFile(typeCode: PostGenFile.TypeCode, filePath: String): PostGenFile {
+        return addGenFile(typeCode, 0, filePath)
     }
 
-    private PostGenFile addGenFile(PostGenFile.TypeCode typeCode, int fileNo, String filePath) {
-        return processGenFile(null, typeCode, fileNo, filePath);
+    private fun addGenFile(typeCode: PostGenFile.TypeCode, fileNo: Int, filePath: String): PostGenFile {
+        return processGenFile(null, typeCode, fileNo, filePath)
     }
 
-    private int getNextGenFileNo(PostGenFile.TypeCode typeCode) {
+    private fun getNextGenFileNo(typeCode: PostGenFile.TypeCode): Int {
         return genFiles.stream()
-                .filter(genFile -> genFile.getTypeCode().equals(typeCode))
-                .mapToInt(PostGenFile::getFileNo)
-                .max()
-                .orElse(0) + 1;
+            .filter { genFile -> genFile.typeCode == typeCode }
+            .mapToInt { genFile -> genFile.fileNo }
+            .max()
+            .orElse(0) + 1
     }
 
-    public Optional<PostGenFile> getGenFileById(long id) {
+    fun getGenFileById(id: Long): Optional<PostGenFile> {
         return genFiles.stream()
-                .filter(genFile -> genFile.getId().equals(id))
-                .findFirst();
+            .filter { genFile -> genFile.id == id }
+            .findFirst()
     }
 
-    public Optional<PostGenFile> getGenFileByTypeCodeAndFileNo(PostGenFile.TypeCode typeCode, int fileNo) {
+    fun getGenFileByTypeCodeAndFileNo(typeCode: PostGenFile.TypeCode, fileNo: Int): Optional<PostGenFile> {
         return genFiles.stream()
-                .filter(genFile -> genFile.getTypeCode().equals(typeCode))
-                .filter(genFile -> genFile.getFileNo() == fileNo)
-                .findFirst();
+            .filter { genFile -> genFile.typeCode == typeCode }
+            .filter { genFile -> genFile.fileNo == fileNo }
+            .findFirst()
     }
 
-    public void deleteGenFile(PostGenFile.TypeCode typeCode, int fileNo) {
+    fun deleteGenFile(typeCode: PostGenFile.TypeCode, fileNo: Int) {
         getGenFileByTypeCodeAndFileNo(typeCode, fileNo)
-                .ifPresent(this::deleteGenFile);
+            .ifPresent { this.deleteGenFile(it) }
     }
 
-    public void deleteGenFile(PostGenFile postGenFile) {
-        Ut.file.rm(postGenFile.getFilePath());
-        genFiles.remove(postGenFile);
+    fun deleteGenFile(postGenFile: PostGenFile) {
+        Ut.file.rm(postGenFile.filePath)
+        genFiles.remove(postGenFile)
     }
 
-    public PostGenFile modifyGenFile(PostGenFile postGenFile, String filePath) {
-        return processGenFile(postGenFile, postGenFile.getTypeCode(), postGenFile.getFileNo(), filePath);
+    fun modifyGenFile(postGenFile: PostGenFile, filePath: String): PostGenFile {
+        return processGenFile(postGenFile, postGenFile.typeCode, postGenFile.fileNo, filePath)
     }
 
-    public PostGenFile modifyGenFile(PostGenFile.TypeCode typeCode, int fileNo, String filePath) {
-        PostGenFile postGenFile = getGenFileByTypeCodeAndFileNo(
-                typeCode,
-                fileNo
-        ).get();
+    fun modifyGenFile(typeCode: PostGenFile.TypeCode, fileNo: Int, filePath: String): PostGenFile {
+        val postGenFile = getGenFileByTypeCodeAndFileNo(
+            typeCode,
+            fileNo
+        ).get()
 
-        return modifyGenFile(postGenFile, filePath);
+        return modifyGenFile(postGenFile, filePath)
     }
 
-    public PostGenFile putGenFile(PostGenFile.TypeCode typeCode, int fileNo, String filePath) {
-        Optional<PostGenFile> opPostGenFile = getGenFileByTypeCodeAndFileNo(
-                typeCode,
-                fileNo
-        );
+    fun putGenFile(typeCode: PostGenFile.TypeCode, fileNo: Int, filePath: String): PostGenFile {
+        val opPostGenFile = getGenFileByTypeCodeAndFileNo(
+            typeCode,
+            fileNo
+        )
 
-        if (opPostGenFile.isPresent()) {
-            return modifyGenFile(typeCode, fileNo, filePath);
+        return if (opPostGenFile.isPresent) {
+            modifyGenFile(typeCode, fileNo, filePath)
         } else {
-            return addGenFile(typeCode, fileNo, filePath);
+            addGenFile(typeCode, fileNo, filePath)
         }
     }
 
-    public void checkActorCanMakeNewGenFile(Member actor) {
+    fun checkActorCanMakeNewGenFile(actor: Member?) {
         Optional.of(
-                        getCheckActorCanMakeNewGenFileRs(actor)
-                )
-                .filter(RsData::isFail)
-                .ifPresent(rsData -> {
-                    throw new ServiceException(rsData.getResultCode(), rsData.getMsg());
-                });
+            getCheckActorCanMakeNewGenFileRs(actor)
+        )
+            .filter { rsData -> rsData.isFail }
+            .ifPresent { rsData ->
+                throw ServiceException(rsData.resultCode, rsData.msg)
+            }
     }
 
-    public RsData<Empty> getCheckActorCanMakeNewGenFileRs(Member actor) {
-        if (actor == null) return new RsData<>("401-1", "로그인 후 이용해주세요.");
+    fun getCheckActorCanMakeNewGenFileRs(actor: Member?): RsData<Empty> {
+        if (actor == null) return RsData("401-1", "로그인 후 이용해주세요.")
 
-        if (actor.equals(author)) return RsData.OK;
+        if (actor == author) return RsData.OK
 
-        return new RsData<>("403-1", "작성자만 파일을 업로드할 수 있습니다.");
+        return RsData("403-1", "작성자만 파일을 업로드할 수 있습니다.")
     }
 
-    public boolean isTemp() {
-        return !published && "임시글".equals(title);
-    }
+    val isTemp: Boolean
+        get() = !published && "임시글" == title
 
-    public String getThumbnailImgUrlOrDefault() {
-        return Optional.ofNullable(thumbnailGenFile)
-                .map(PostGenFile::getPublicUrl)
-                .orElse("https://placehold.co/1200x1200?text=POST " + getId() + "&darkInvertible=1");
-    }
+    val thumbnailImgUrlOrDefault: String
+        get() = Optional.ofNullable(thumbnailGenFile)
+            .map { it.publicUrl }
+            .orElse("https://placehold.co/1200x1200?text=POST $id&darkInvertible=1")
 }
