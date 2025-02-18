@@ -1,31 +1,23 @@
 package com.ll.global.jpa.entity;
 
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.MappedSuperclass;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.MappedSuperclass
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.LocalDateTime
 
-import java.time.LocalDateTime;
 
-@Getter
-@EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor
 @MappedSuperclass
-public abstract class BaseTime extends BaseEntity {
+@EntityListeners(AuditingEntityListener::class)
+abstract class BaseTime : BaseEntity() {
     @CreatedDate
-    @Setter(AccessLevel.PRIVATE)
-    private LocalDateTime createDate;
+    lateinit var createDate: LocalDateTime
 
     @LastModifiedDate
-    @Setter(AccessLevel.PRIVATE)
-    public LocalDateTime modifyDate; // TODO : 나중에 작업
+    lateinit var modifyDate: LocalDateTime
 
-    public void setCreateDateNow() {
+    fun setCreateDateNow() {
         this.createDate = LocalDateTime.now();
         this.modifyDate = createDate;
     }

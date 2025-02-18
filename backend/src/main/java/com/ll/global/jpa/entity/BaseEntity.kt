@@ -1,26 +1,17 @@
-package com.ll.global.jpa.entity;
+package com.ll.global.jpa.entity
 
-import com.ll.standard.util.Ut;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
-import lombok.*;
+import com.ll.standard.util.Ut
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.MappedSuperclass
 
-import static jakarta.persistence.GenerationType.IDENTITY;
-
-@Getter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@NoArgsConstructor
 @MappedSuperclass
-public abstract class BaseEntity {
+abstract class BaseEntity {
     @Id
-    @GeneratedValue(strategy = IDENTITY)
-    @Setter(AccessLevel.PROTECTED)
-    @EqualsAndHashCode.Include
-    public Long id; // TODO : 추후 private 로 교체
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long? = null
 
-    public String getModelName() {
-        String simpleName = this.getClass().getSimpleName();
-        return Ut.str.lcfirst(simpleName);
-    }
+    val modelName: String
+        get() = Ut.str.lcfirst(javaClass.simpleName)
 }
