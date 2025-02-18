@@ -17,7 +17,7 @@ public abstract class BaseEntity {
     @GeneratedValue(strategy = IDENTITY)
     @Setter(AccessLevel.PROTECTED)
     @EqualsAndHashCode.Include
-    private Long id;
+    public Long id; // TODO : 추후 private 로 교체
 
     public String getModelName() {
         String simpleName = this.getClass().getSimpleName();
