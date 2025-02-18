@@ -34,13 +34,13 @@ public class PostService {
     }
 
     public Post write(Member author, String title, String content, boolean published, boolean listed) {
-        Post post = Post.builder()
-                .author(author)
-                .title(title)
-                .content(content)
-                .published(published)
-                .listed(listed)
-                .build();
+        Post post = new Post(
+                author,
+                title,
+                content,
+                published,
+                listed
+        );
 
         return postRepository.save(post);
     }
@@ -65,7 +65,7 @@ public class PostService {
         post.setPublished(published);
         post.setListed(listed);
 
-        if ( wasTemp && !post.isTemp() ) {
+        if (wasTemp && !post.isTemp()) {
             post.setCreateDateNow();
         }
     }
