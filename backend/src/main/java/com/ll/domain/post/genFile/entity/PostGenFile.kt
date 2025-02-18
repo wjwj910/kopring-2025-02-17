@@ -1,39 +1,32 @@
 package com.ll.domain.post.genFile.entity;
 
-import com.ll.domain.base.genFile.genFile.entity.GenFile;
-import com.ll.domain.post.post.entity.Post;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.ll.domain.base.genFile.genFile.entity.GenFile
+import com.ll.domain.post.post.entity.Post
+import jakarta.persistence.*
 
 @Entity
-@Getter
-@NoArgsConstructor
-public class PostGenFile extends GenFile {
-    public enum TypeCode {
+class PostGenFile : GenFile {
+    enum class TypeCode {
         attachment,
         thumbnail
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Post post;
+    lateinit var post: Post
+
     @Enumerated(EnumType.STRING)
-    private TypeCode typeCode;
+    lateinit var typeCode: TypeCode
 
-    @Override
-    protected long getOwnerModelId() {
-        return post.getId();
-    }
-
-    @Override
-    protected String getTypeCodeAsStr() {
-        return typeCode.name();
-    }
-
-    public PostGenFile(Post post, TypeCode typeCode, int fileNo) {
-        super(fileNo);
-
+    constructor(post: Post, typeCode: TypeCode, fileNo: Int) : super(fileNo) {
         this.post = post;
         this.typeCode = typeCode;
+    }
+
+    override fun getOwnerModelId(): Long {
+        return post.id
+    }
+
+    override fun getTypeCodeAsStr(): String {
+        return typeCode.name
     }
 }
