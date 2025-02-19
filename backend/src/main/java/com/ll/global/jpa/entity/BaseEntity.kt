@@ -14,7 +14,7 @@ abstract class BaseEntity {
         get() = _id ?: 0
 
     val modelName: String
-        get() = Ut.str.lcfirst(this::class.simpleName)
+        get() = Ut.str.lcfirst(this::class.simpleName!!)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
