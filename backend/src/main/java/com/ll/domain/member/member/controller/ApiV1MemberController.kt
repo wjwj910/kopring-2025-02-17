@@ -111,9 +111,8 @@ class ApiV1MemberController(
     }
 
 
-    @JvmRecord
     data class MemberModifyMeReqBody(
-        val nickname: @NotBlank String?
+        val nickname: @NotBlank String
     )
 
     @PutMapping("/me")
