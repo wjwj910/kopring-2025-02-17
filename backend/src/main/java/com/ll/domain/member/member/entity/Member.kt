@@ -1,4 +1,4 @@
-package com.ll.domain.member.member.entity;
+package com.ll.domain.member.member.entity
 
 import com.ll.global.jpa.entity.BaseTime
 import com.ll.standard.util.Ut
@@ -33,15 +33,15 @@ class Member : BaseTime {
         this.id = id
         this.username = username
         this.nickname = nickname
-        this.profileImgUrl = ""; // TODO : 추후에 어떻게 할지 고민
+        this.profileImgUrl = "" // TODO : 추후에 어떻게 할지 고민
     }
 
     constructor(username: String, password: String, nickname: String, apiKey: String, profileImgUrl: String) {
-        this.username = username;
-        this.password = password;
-        this.nickname = nickname;
-        this.apiKey = apiKey;
-        this.profileImgUrl = profileImgUrl;
+        this.username = username
+        this.password = password
+        this.nickname = nickname
+        this.apiKey = apiKey
+        this.profileImgUrl = profileImgUrl
     }
 
     fun matchPassword(password: String): Boolean {

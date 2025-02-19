@@ -1,4 +1,4 @@
-package com.ll.domain.post.genFile.entity;
+package com.ll.domain.post.genFile.entity
 
 import com.ll.domain.base.genFile.genFile.entity.GenFile
 import com.ll.domain.post.post.entity.Post
@@ -18,8 +18,8 @@ class PostGenFile : GenFile {
     lateinit var typeCode: TypeCode
 
     constructor(post: Post, typeCode: TypeCode, fileNo: Int) : super(fileNo) {
-        this.post = post;
-        this.typeCode = typeCode;
+        this.post = post
+        this.typeCode = typeCode
     }
 
     override fun getOwnerModelId(): Long {

@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ll.standard.base.Empty;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.lang.NonNull;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
+@Getter
 public class RsData<T> {
     public static final RsData<Empty> OK = new RsData<>("200-1", "OK", new Empty());
 
@@ -19,6 +21,10 @@ public class RsData<T> {
 
     @NonNull
     private final T data;
+
+    public RsData(String resultCode, String msg) {
+        this(resultCode, msg, (T) new Empty());
+    }
 
     @NonNull
     public String getResultCode() {
@@ -33,10 +39,6 @@ public class RsData<T> {
     @NonNull
     public T getData() {
         return data;
-    }
-
-    public RsData(String resultCode, String msg) {
-        this(resultCode, msg, (T) new Empty());
     }
 
     @JsonIgnore

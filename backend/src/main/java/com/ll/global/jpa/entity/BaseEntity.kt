@@ -1,4 +1,4 @@
-package com.ll.global.jpa.entity
+package com.ll.global.jpa.entity;
 
 import com.ll.standard.util.Ut
 import jakarta.persistence.GeneratedValue
@@ -13,5 +13,20 @@ abstract class BaseEntity {
     var id: Long? = null
 
     val modelName: String
-        get() = Ut.str.lcfirst(javaClass.simpleName)
+        get() = Ut.str.lcfirst(this::class.simpleName)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+
+        other as BaseEntity
+
+        if (id == null || other.id == null) return false
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: System.identityHashCode(this)
+    }
 }
