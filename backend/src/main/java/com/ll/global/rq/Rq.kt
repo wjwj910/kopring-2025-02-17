@@ -23,7 +23,7 @@ class Rq(
 ) {
     fun setLogin(member: Member) {
         val user: UserDetails = SecurityUser(
-            member.id!!,
+            member.id,
             member.username,
             "",
             member.nickname,
