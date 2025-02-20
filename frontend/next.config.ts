@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
         hostname: "placehold.co",
       },
       {
+        protocol: "https",
+        hostname: "*pstatic.net"
+      },
+      {
         protocol: "http",
         hostname: "localhost",
       },
