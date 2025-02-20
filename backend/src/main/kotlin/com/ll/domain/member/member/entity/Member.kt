@@ -8,7 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 
 @Entity
 class Member : BaseTime {
-    @Column(unique = true, length = 30)
+    @Column(unique = true, length = 60)
     lateinit var username: String
 
     @Column(length = 50)

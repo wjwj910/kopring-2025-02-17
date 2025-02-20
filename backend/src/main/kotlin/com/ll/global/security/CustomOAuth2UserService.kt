@@ -13,33 +13,38 @@ class CustomOAuth2UserService(
     private val memberService: MemberService
 ) : DefaultOAuth2UserService() {
 
-    // 소셜 로그인이 성공할 때마다 이 함수가 실행된다.
     @Transactional
     override fun loadUser(userRequest: OAuth2UserRequest): OAuth2User {
         val oAuth2User = super.loadUser(userRequest)
 
-        val oauthId = oAuth2User.name
         val providerTypeCode = userRequest
             .clientRegistration
             .registrationId
             .uppercase(Locale.getDefault())
 
         val attributes = oAuth2User.attributes
-        val attributesProperties = attributes["properties"] as Map<String, String>
 
-        val nickname = attributesProperties["nickname"]!!
-        val profileImgUrl = attributesProperties["profile_image"]!!
+        val (oauthId, nickname, profileImgUrl) = when (providerTypeCode) {
+            "NAVER" -> {
+                val props = attributes["response"] as Map<String, String>
+                Triple(props["id"]!!, props["nickname"]!!, props["profile_image"]!!)
+            }
+
+            else -> {
+                val props = attributes["properties"] as Map<String, String>
+                Triple(oAuth2User.name, props["nickname"]!!, props["profile_image"]!!)
+            }
+        }
+
         val username = "${providerTypeCode}__${oauthId}"
-
-        val member = memberService
-            .modifyOrJoin(username, nickname, profileImgUrl)
+        val member = memberService.modifyOrJoin(username, nickname, profileImgUrl)
 
         return SecurityUser(
-            member.id,
-            member.username,
-            "",
-            member.nickname,
-            member.authorities
+            id = member.id,
+            username = member.username,
+            password = "",
+            nickname = member.nickname,
+            authorities = member.authorities
         )
     }
 }
