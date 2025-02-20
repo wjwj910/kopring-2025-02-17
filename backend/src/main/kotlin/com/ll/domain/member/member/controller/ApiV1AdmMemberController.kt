@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/adm/members")
-@Tag(name = "ApiV1MemberController", description = "API 관리자용 회원 컨트롤러")
+@Tag(name = "ApiV1AdmMemberController", description = "API 관리자용 회원 컨트롤러")
 @SecurityRequirement(name = "bearerAuth")
 class ApiV1AdmMemberController(
     private val memberService: MemberService
