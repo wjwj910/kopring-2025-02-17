@@ -337,9 +337,9 @@ export interface components {
             typeCode: "attachment" | "thumbnail";
             fileExtTypeCode: string;
             fileExtType2Code: string;
-            /** Format: int64 */
+            /** Format: int32 */
             fileSize: number;
-            /** Format: int64 */
+            /** Format: int32 */
             fileNo: number;
             fileExt: string;
             fileDateDir: string;
@@ -377,8 +377,8 @@ export interface components {
         PostModifyReqBody: {
             title: string;
             content: string;
-            published?: boolean;
-            listed?: boolean;
+            published: boolean;
+            listed: boolean;
         };
         PostDto: {
             /** Format: int64 */
@@ -422,8 +422,8 @@ export interface components {
         PostWriteReqBody: {
             title: string;
             content: string;
-            published?: boolean;
-            listed?: boolean;
+            published: boolean;
+            listed: boolean;
         };
         RsDataListPostGenFileDto: {
             resultCode: string;
@@ -464,6 +464,9 @@ export interface components {
             items: components["schemas"]["PostDto"][];
         };
         PostWithContentDto: {
+            content: string;
+            actorCanModify?: boolean;
+            actorCanDelete?: boolean;
             /** Format: int64 */
             id: number;
             /** Format: date-time */
@@ -478,9 +481,6 @@ export interface components {
             published: boolean;
             listed: boolean;
             thumbnailImgUrl: string;
-            content: string;
-            actorCanModify?: boolean;
-            actorCanDelete?: boolean;
         };
         PostStatisticsResBody: {
             /** Format: int64 */
