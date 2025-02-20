@@ -14,13 +14,14 @@ abstract class BaseEntity {
         get() = _id ?: 0
 
     val modelName: String
-        get() = com.ll.standard.util.Ut.str.lcfirst(this::class.simpleName!!)
+        get() = Ut.str.lcfirst(this::class.simpleName!!)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || javaClass != other.javaClass) return false
+        if (other == null || other !is BaseEntity) return false
 
-        other as BaseEntity
+        // 아래 비교는 modelName 이 아니라 Hibernate.getClass(other) 를 사용해도 됩니다.
+        if (modelName != other.modelName) return false
 
         return id == other.id
     }
