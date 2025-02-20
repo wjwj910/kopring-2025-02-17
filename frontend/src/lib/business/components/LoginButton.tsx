@@ -9,6 +9,7 @@ export default function LoginButton({
   className,
   text,
   icon,
+  providerTypeCode = "kakao",
 }: {
   variant?:
     | "link"
@@ -22,8 +23,9 @@ export default function LoginButton({
   className?: string;
   text?: string | boolean;
   icon?: React.ReactNode;
+  providerTypeCode?: string;
 }) {
-  const socialLoginForKakaoUrl = `http://localhost:8080/oauth2/authorization/kakao`;
+  const socialLoginForKakaoUrl = `http://localhost:8080/oauth2/authorization/${providerTypeCode}`;
   const redirectUrlAfterSocialLogin = "http://localhost:3000";
   if (!variant) variant = "link";
   if (typeof text === "boolean") text = "로그인";
