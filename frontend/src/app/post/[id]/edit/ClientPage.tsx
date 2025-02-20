@@ -54,7 +54,7 @@ const writeFormSchema = z.object({
 type WriteFormInputs = z.infer<typeof writeFormSchema>;
 
 export default function ClientPage({
-  post,
+  post: _post,
 }: {
   post: components["schemas"]["PostWithContentDto"];
 }) {
@@ -62,6 +62,7 @@ export default function ClientPage({
   const { toast } = useToast();
 
   const [attachmentInputKey, setAttachmentInputKey] = useState(0);
+  const [post, setPost] = useState(_post);
 
   useEffect(() => {
     const needToRefresh = window.sessionStorage.getItem("needToRefresh");
@@ -202,6 +203,14 @@ export default function ClientPage({
         });
         return;
       }
+
+      setPost({
+        ...post,
+        title: data.title,
+        content: data.content,
+        published: data.published,
+        listed: data.listed,
+      });
 
       toast({
         title: response.data.msg,
