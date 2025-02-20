@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import html2canvas from "html2canvas";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -46,8 +46,8 @@ const writeFormSchema = z.object({
     .min(1, "내용을 입력해주세요.")
     .min(2, "내용은 2자 이상이어야 합니다.")
     .max(10_000_000, "내용은 1,000만자 이하여야 합니다."),
-  published: z.boolean().optional(),
-  listed: z.boolean().optional(),
+  published: z.boolean(),
+  listed: z.boolean(),
   attachment_0: z.array(z.instanceof(File)).optional(),
 });
 
@@ -60,6 +60,8 @@ export default function ClientPage({
 }) {
   const router = useRouter();
   const { toast } = useToast();
+
+  const [attachmentInputKey, setAttachmentInputKey] = useState(0);
 
   useEffect(() => {
     const needToRefresh = window.sessionStorage.getItem("needToRefresh");
@@ -234,6 +236,7 @@ export default function ClientPage({
         data.attachment_0,
         post.id,
       );
+
       if (uploadResponse.error) {
         toast({
           title: uploadResponse.error.msg,
@@ -241,6 +244,14 @@ export default function ClientPage({
         });
         return;
       }
+
+      // 파일 업로드 성공 후 input 초기화
+      form.reset({
+        ...form.getValues(),
+        attachment_0: undefined,
+      });
+
+      setAttachmentInputKey((prev) => prev + 1);
 
       toast({
         title: uploadResponse.data.msg,
@@ -314,6 +325,7 @@ export default function ClientPage({
                 </FormLabel>
                 <FormControl>
                   <Input
+                    key={attachmentInputKey}
                     type="file"
                     multiple
                     accept={getUplodableInputAccept()}
