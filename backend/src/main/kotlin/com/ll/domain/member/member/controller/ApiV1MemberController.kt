@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*
 @SecurityRequirement(name = "bearerAuth")
 class ApiV1MemberController(
     private val memberService: MemberService,
+    private val passwordEncoder: PasswordEncoder,
     private val rq: Rq
 ) {
     data class MemberJoinReqBody(
@@ -70,7 +72,10 @@ class ApiV1MemberController(
                 )
             }
 
-        if (!member.matchPassword(reqBody.password)) throw ServiceException("401-2", "비밀번호가 일치하지 않습니다.")
+        if (!passwordEncoder.matches(reqBody.password, member.password)) throw ServiceException(
+            "401-2",
+            "비밀번호가 일치하지 않습니다."
+        )
 
         val accessToken = rq.makeAuthCookies(member)
 

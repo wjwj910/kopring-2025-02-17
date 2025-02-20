@@ -1,6 +1,7 @@
 package com.ll.domain.member.member.entity
 
 import com.ll.global.jpa.entity.BaseTime
+import com.ll.standard.util.Ut
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import org.springframework.security.core.GrantedAuthority
@@ -11,7 +12,7 @@ class Member : BaseTime {
     @Column(unique = true, length = 60)
     lateinit var username: String
 
-    @Column(length = 50)
+    @Column(length = 65)
     lateinit var password: String
 
     @Column(length = 30)
@@ -43,10 +44,6 @@ class Member : BaseTime {
         this.profileImgUrl = profileImgUrl
     }
 
-    fun matchPassword(password: String): Boolean {
-        return this.password == password
-    }
-
     val authoritiesAsStringList: List<String>
         get() {
             val authorities: MutableList<String> = ArrayList()
@@ -63,5 +60,5 @@ class Member : BaseTime {
             .toList()
 
     val profileImgUrlOrDefault: String
-        get() = if (com.ll.standard.util.Ut.str.isBlank(profileImgUrl)) "https://placehold.co/640x640?text=O_O" else profileImgUrl
+        get() = if (Ut.str.isBlank(profileImgUrl)) "https://placehold.co/640x640?text=O_O" else profileImgUrl
 }

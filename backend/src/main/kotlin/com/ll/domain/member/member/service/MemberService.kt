@@ -8,13 +8,15 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class MemberService(
     private val authTokenService: AuthTokenService,
-    private val memberRepository: MemberRepository
+    private val memberRepository: MemberRepository,
+    private val passwordEncoder: PasswordEncoder
 ) {
     fun count(): Long {
         return memberRepository.count()
@@ -29,7 +31,7 @@ class MemberService(
 
         val member = Member(
             username,
-            password,
+            if (password.isNotBlank()) passwordEncoder.encode(password) else "",
             nickname,
             UUID.randomUUID().toString(),
             profileImgUrl
