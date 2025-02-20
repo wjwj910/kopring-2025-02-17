@@ -37,7 +37,7 @@ object Ut {
 
         @JvmStatic
         fun isNotBlank(str: String?): Boolean {
-            return !com.ll.standard.util.Ut.str.isBlank(str)
+            return !isBlank(str)
         }
     }
 
@@ -46,7 +46,7 @@ object Ut {
 
         @JvmStatic
         fun toString(obj: Any): String {
-            return com.ll.standard.util.Ut.json.om.writeValueAsString(obj)
+            return om.writeValueAsString(obj)
         }
     }
 
@@ -146,7 +146,7 @@ object Ut {
 
             val tempFilePath = "$dirPath/${UUID.randomUUID()}.tmp"
 
-            com.ll.standard.util.Ut.file.mkdir(dirPath)
+            mkdir(dirPath)
 
             // 실제 파일 다운로드
             val response = client.send(
@@ -155,23 +155,23 @@ object Ut {
             )
 
             // 파일 확장자 추출
-            var extension = com.ll.standard.util.Ut.file.getExtensionFromResponse(response)
+            var extension = getExtensionFromResponse(response)
 
             if (extension == "tmp") {
-                extension = com.ll.standard.util.Ut.file.getExtensionByTika(tempFilePath)
+                extension = getExtensionByTika(tempFilePath)
             }
 
             // 파일명 추출
-            val filename = com.ll.standard.util.Ut.file.getFilenameWithoutExtFromUrl(url)
+            val filename = getFilenameWithoutExtFromUrl(url)
 
             val finalFilename = if (uniqueFilename)
-                "${UUID.randomUUID()}${com.ll.standard.util.Ut.file.ORIGINAL_FILE_NAME_SEPARATOR}$filename"
+                "${UUID.randomUUID()}$ORIGINAL_FILE_NAME_SEPARATOR$filename"
             else
                 filename
 
             val newFilePath = "$dirPath/$finalFilename.$extension"
 
-            com.ll.standard.util.Ut.file.mv(tempFilePath, newFilePath)
+            mv(tempFilePath, newFilePath)
 
             return newFilePath
         }
@@ -179,12 +179,12 @@ object Ut {
         @JvmStatic
         fun getExtensionByTika(filePath: String): String {
             val mineType = AppConfig.getTika().detect(filePath)
-            return com.ll.standard.util.Ut.file.MIME_TYPE_MAP.getOrDefault(mineType, "tmp")
+            return MIME_TYPE_MAP.getOrDefault(mineType, "tmp")
         }
 
         @JvmStatic
         fun mv(oldFilePath: String, newFilePath: String) {
-            com.ll.standard.util.Ut.file.mkdir(Paths.get(newFilePath).parent.toString())
+            mkdir(Paths.get(newFilePath).parent.toString())
 
             Files.move(
                 Path.of(oldFilePath),
@@ -220,7 +220,7 @@ object Ut {
         private fun getExtensionFromResponse(response: HttpResponse<*>): String {
             return response.headers()
                 .firstValue("Content-Type")
-                .map { contentType -> com.ll.standard.util.Ut.file.MIME_TYPE_MAP.getOrDefault(contentType, "tmp") }
+                .map { MIME_TYPE_MAP.getOrDefault(it, "tmp") }
                 .orElse("tmp")
         }
 
@@ -233,15 +233,15 @@ object Ut {
         fun getOriginalFileName(filePath: String): String {
             val originalFileName = Path.of(filePath).fileName.toString()
 
-            return if (originalFileName.contains(com.ll.standard.util.Ut.file.ORIGINAL_FILE_NAME_SEPARATOR))
-                originalFileName.substring(originalFileName.indexOf(com.ll.standard.util.Ut.file.ORIGINAL_FILE_NAME_SEPARATOR) + com.ll.standard.util.Ut.file.ORIGINAL_FILE_NAME_SEPARATOR.length)
+            return if (originalFileName.contains(ORIGINAL_FILE_NAME_SEPARATOR))
+                originalFileName.substring(originalFileName.indexOf(ORIGINAL_FILE_NAME_SEPARATOR) + ORIGINAL_FILE_NAME_SEPARATOR.length)
             else
                 originalFileName
         }
 
         @JvmStatic
         fun getFileExt(filePath: String): String {
-            val filename = com.ll.standard.util.Ut.file.getOriginalFileName(filePath)
+            val filename = getOriginalFileName(filePath)
 
             return if (filename.contains("."))
                 filename.substring(filename.lastIndexOf('.') + 1)
@@ -301,10 +301,10 @@ object Ut {
 
         @JvmStatic
         fun getMetadata(filePath: String): Map<String, Any> {
-            val ext = com.ll.standard.util.Ut.file.getFileExt(filePath)
-            val fileExtTypeCode = com.ll.standard.util.Ut.file.getFileExtTypeCodeFromFileExt(ext)
+            val ext = getFileExt(filePath)
+            val fileExtTypeCode = getFileExtTypeCodeFromFileExt(ext)
 
-            return if (fileExtTypeCode == "img") com.ll.standard.util.Ut.file.getImgMetadata(filePath) else emptyMap()
+            return if (fileExtTypeCode == "img") getImgMetadata(filePath) else emptyMap()
         }
 
         private fun getImgMetadata(filePath: String): Map<String, Any> {
@@ -342,14 +342,14 @@ object Ut {
             if (multipartFile == null) return ""
             if (multipartFile.isEmpty) return ""
 
-            val fileName = if (com.ll.standard.util.Ut.str.isBlank(metaStr))
-                "${UUID.randomUUID()}${com.ll.standard.util.Ut.file.ORIGINAL_FILE_NAME_SEPARATOR}${multipartFile.originalFilename}"
+            val fileName = if (str.isBlank(metaStr))
+                "${UUID.randomUUID()}$ORIGINAL_FILE_NAME_SEPARATOR${multipartFile.originalFilename}"
             else
-                "$metaStr${com.ll.standard.util.Ut.file.META_STR_SEPARATOR}${UUID.randomUUID()}${com.ll.standard.util.Ut.file.ORIGINAL_FILE_NAME_SEPARATOR}${multipartFile.originalFilename}"
+                "$metaStr$META_STR_SEPARATOR${UUID.randomUUID()}$ORIGINAL_FILE_NAME_SEPARATOR${multipartFile.originalFilename}"
 
             val filePath = "$dirPath/$fileName"
 
-            com.ll.standard.util.Ut.file.mkdir(dirPath)
+            mkdir(dirPath)
             multipartFile.transferTo(File(filePath))
 
             return filePath
@@ -357,7 +357,7 @@ object Ut {
 
         @JvmStatic
         fun copy(filePath: String, newFilePath: String) {
-            com.ll.standard.util.Ut.file.mkdir(Paths.get(newFilePath).parent.toString())
+            mkdir(Paths.get(newFilePath).parent.toString())
 
             Files.copy(
                 Path.of(filePath),
@@ -368,7 +368,7 @@ object Ut {
 
         @JvmStatic
         fun getContentType(fileExt: String): String {
-            return com.ll.standard.util.Ut.file.MIME_TYPE_MAP.entries
+            return MIME_TYPE_MAP.entries
                 .find { it.value == fileExt }
                 ?.key ?: ""
         }
@@ -383,15 +383,15 @@ object Ut {
 
         @JvmStatic
         fun getFileExtTypeCodeFromFilePath(filePath: String): String {
-            val ext = com.ll.standard.util.Ut.file.getFileExt(filePath)
-            return com.ll.standard.util.Ut.file.getFileExtTypeCodeFromFileExt(ext)
+            val ext = getFileExt(filePath)
+            return getFileExtTypeCodeFromFileExt(ext)
         }
 
         @JvmStatic
         fun getMetadataStrFromFileName(filePath: String): String {
             val fileName = Path.of(filePath).fileName.toString()
-            return if (fileName.contains(com.ll.standard.util.Ut.file.META_STR_SEPARATOR))
-                fileName.substring(0, fileName.indexOf(com.ll.standard.util.Ut.file.META_STR_SEPARATOR))
+            return if (fileName.contains(META_STR_SEPARATOR))
+                fileName.substring(0, fileName.indexOf(META_STR_SEPARATOR))
             else
                 ""
         }
@@ -400,7 +400,7 @@ object Ut {
     object cmd {
         @JvmStatic
         fun runAsync(cmd: String) {
-            Thread { com.ll.standard.util.Ut.cmd.run(cmd) }.start()
+            Thread { run(cmd) }.start()
         }
 
         @JvmStatic

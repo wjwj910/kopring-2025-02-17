@@ -7,9 +7,7 @@ import com.ll.global.exceptions.ServiceException
 import com.ll.global.jpa.entity.BaseTime
 import com.ll.global.rsData.RsData
 import com.ll.standard.base.Empty
-import com.ll.standard.util.Ut
 import jakarta.persistence.*
-
 import java.util.*
 import java.util.stream.Collectors
 
@@ -151,7 +149,7 @@ class Post : BaseTime {
         val fileExtType2Code = com.ll.standard.util.Ut.file.getFileExtType2CodeFromFileExt(fileExt)
 
         var metadataStr = com.ll.standard.util.Ut.file.getMetadata(filePath).entries.stream()
-            .map { entry -> entry.key + "=" + entry.value }
+            .map { it.key + "=" + it.value }
             .collect(Collectors.joining("&"))
 
         if (com.ll.standard.util.Ut.str.isNotBlank(metadataStrFromFileName)) {

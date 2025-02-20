@@ -1,7 +1,6 @@
 package com.ll.domain.member.member.controller
 
 import com.ll.domain.member.member.dto.MemberWithUsernameDto
-import com.ll.domain.member.member.entity.Member
 import com.ll.domain.member.member.service.MemberService
 import com.ll.standard.page.dto.PageDto
 import com.ll.standard.search.MemberSearchKeywordTypeV1
@@ -29,9 +28,9 @@ class ApiV1AdmMemberController(
     ): PageDto<MemberWithUsernameDto> {
         return PageDto(
             memberService.findByPaged(searchKeywordType, searchKeyword, page, pageSize)
-                .map { member: Member ->
+                .map {
                     MemberWithUsernameDto(
-                        member
+                        it
                     )
                 }
         )

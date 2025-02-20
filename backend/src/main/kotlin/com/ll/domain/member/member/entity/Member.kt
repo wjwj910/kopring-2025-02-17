@@ -1,7 +1,6 @@
 package com.ll.domain.member.member.entity
 
 import com.ll.global.jpa.entity.BaseTime
-import com.ll.standard.util.Ut
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import org.springframework.security.core.GrantedAuthority
@@ -60,7 +59,7 @@ class Member : BaseTime {
     val authorities: Collection<GrantedAuthority>
         get() = authoritiesAsStringList
             .stream()
-            .map { role: String -> SimpleGrantedAuthority(role) }
+            .map { SimpleGrantedAuthority(it) }
             .toList()
 
     val profileImgUrlOrDefault: String
